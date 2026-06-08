@@ -62,10 +62,14 @@ jupyter notebook Deteccao*Falhas_Impressao3D.ipynb
 
 ## 📊 Resultados e Validação
 
-_(Preencher esta seção após a conclusão do treinamento)_
+- **Accuracy (Acurácia):
+<img width="506" height="374" alt="Captura de tela 2026-06-08 170835" src="https://github.com/user-attachments/assets/5708d9c4-1846-4306-807f-b739252d00fd" />
+<img width="497" height="366" alt="Captura de tela 2026-06-08 170840" src="https://github.com/user-attachments/assets/6264d0be-0586-447c-b677-8a60f45afe10" />
 
-- **Accuracy (Acurácia):** %
-- **F1-Score:** \* **Matriz de Confusão:** (Inserir print da matriz gerada)
+
+- **F1-Score:** \* **Matriz de Confusão:**
+<img width="503" height="469" alt="Captura de tela 2026-06-08 170846" src="https://github.com/user-attachments/assets/df29c32d-9f82-4383-bfb4-ff22906018d3" />
+
 
 ---
 
