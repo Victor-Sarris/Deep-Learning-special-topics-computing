@@ -37,25 +37,28 @@ A base de dados utilizada é composta por imagens reais de impressoras FDM de me
 
 ### 1. Clonar o repositório
 
-\`\`\`bash
+```bash
 git clone https://github.com/Victor-Sarris/Deep-Learning-special-topics-computing.git
 cd deep-learning-special-topics-computing
-\`\`\`
+```
 
 ### 2. Instalar as dependências
 
 Certifique-se de ter o Python instalado. É recomendado o uso de um ambiente virtual (venv ou conda).
-\`\`\`bash
+
+```bash
 pip install tensorflow numpy matplotlib seaborn scikit-learn
-\`\`\`
+```
 
 ### 3. Execução
 
 Para treinar o modelo e visualizar as métricas, abra e execute os blocos do notebook principal:
-\`\`\`bash
+
+```bash
 jupyter notebook Deteccao*Falhas_Impressao3D.ipynb
-\`\`\`
-\_Nota: Ao final da execução, um arquivo `.keras` contendo os pesos treinados será gerado para ser consumido na demonstração funcional.*
+```
+
+\_Nota: Ao final da execução, um arquivo `.keras` contendo os pesos treinados será gerado para ser consumido na demonstração funcional.\*
 
 ## 📊 Resultados e Validação
 
