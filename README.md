@@ -8,10 +8,12 @@ O projeto foi desenvolvido como requisito para a Atividade Prática de Deep Lear
 
 ## 👥 Equipe de Desenvolvimento
 
-- **Victor Sarrís Silva Santos**
-- **Cleber Henrique Lacerda Duarte**
+- **Amanda Iasmim de Sousa Nascimento**
+- **Izaque Nicolas Vieira**
+- **José Henirque Vieira da Silva**
 - **Matheus Ribeiro de Araujo**
-- **Izaque Nicolas**
+- **Sabrina Lais Vieira de Ramos**
+- **Victor Sarrís Silva Santos**
 
 ## 📂 Estrutura do Repositório
 
@@ -30,7 +32,7 @@ A base de dados utilizada é composta por imagens reais de impressoras FDM de me
 
 - **Linguagem:** Python 3.x
 - **Deep Learning Framework:** TensorFlow / Keras
-- **Arquitetura Base:** MobileNetV2 (Transfer Learning)
+- **Arquitetura Base:** EfficientNetB3 (Transfer Learning)
 - **Manipulação de Dados e Visualização:** NumPy, Matplotlib, Seaborn, Scikit-learn.
 
 ## 🚀 Instruções de Instalação e Execução
@@ -62,13 +64,15 @@ jupyter notebook Deteccao*Falhas_Impressao3D.ipynb
 
 ## 📊 Resultados e Validação
 
-- **Accuracy (Acurácia):
-<img width="506" height="374" alt="Captura de tela 2026-06-08 170835" src="https://github.com/user-attachments/assets/5708d9c4-1846-4306-807f-b739252d00fd" />
-<img width="497" height="366" alt="Captura de tela 2026-06-08 170840" src="https://github.com/user-attachments/assets/6264d0be-0586-447c-b677-8a60f45afe10" />
-
+- \*\*Accuracy (Acurácia):
+<img width="567" height="449" alt="image" src="https://github.com/user-attachments/assets/75161a6b-0616-4a71-84a7-95fd81bddf17" />
+<img width="587" height="460" alt="image" src="https://github.com/user-attachments/assets/ef5c7b39-eea7-4b6c-9f77-2daafdfb8c1c" />
 
 - **F1-Score:** \* **Matriz de Confusão:**
-<img width="503" height="469" alt="Captura de tela 2026-06-08 170846" src="https://github.com/user-attachments/assets/df29c32d-9f82-4383-bfb4-ff22906018d3" />
+<img width="639" height="482" alt="image" src="https://github.com/user-attachments/assets/6e1164d7-4491-4809-938e-33730bf31dd5" />
+
+- **Curva ROC:**
+<img width="697" height="463" alt="image" src="https://github.com/user-attachments/assets/cc05fdf8-16e0-4bb7-8765-3309a037e511" />
 
 
 ---
