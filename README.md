@@ -8,10 +8,12 @@ O projeto foi desenvolvido como requisito para a Atividade Prática de Deep Lear
 
 ## 👥 Equipe de Desenvolvimento
 
-- **Victor Sarrís Silva Santos**
-- **Cleber Henrique Lacerda Duarte**
+- **Amanda Iasmim de Sousa Nascimento**
+- **Izaque Nicolas Vieira**
+- **José Henirque Vieira da Silva**
 - **Matheus Ribeiro de Araujo**
-- **Izaque Nicolas**
+- **Sabrina Lais Vieira de Ramos**
+- **Victor Sarrís Silva Santos**
 
 ## 📂 Estrutura do Repositório
 
