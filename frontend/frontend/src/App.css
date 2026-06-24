@@ -1,0 +1,132 @@
+#root {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.header h1 {
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.header p {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 30px;
+}
+
+.upload-section {
+  margin-bottom: 20px;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-btn {
+  background-color: #4a90e2;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.upload-btn:hover {
+  background-color: #357abd;
+}
+
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 3px solid #ddd;
+}
+
+.analyze-btn {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  max-width: 300px;
+}
+
+.analyze-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.result-card {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: left;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.result-card.success {
+  background-color: #e8f8f5;
+  border-left: 6px solid #2ecc71;
+  color: #1e8449;
+}
+
+.result-card.failure {
+  background-color: #fdedec;
+  border-left: 6px solid #e74c3c;
+  color: #c0392b;
+  animation: pulseRed 2s infinite;
+}
+
+.result-card h2 {
+  margin-top: 0;
+}
+
+.alert-box {
+  margin-top: 15px;
+  background-color: #c0392b;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseRed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
+}
