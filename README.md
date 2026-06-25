@@ -24,13 +24,13 @@
 
 ### Contexto
 
-A impressão 3D por deposição de material fundido (FDM) é amplamente utilizada em prototipagem, manufatura distribuída e produção acadêmica. No entanto, o processo é suscetível a falhas silenciosas — em especial o **Efeito Espaguete**, onde o filamento é extrudado no ar sem aderir ao modelo, resultando em uma malha caótica de plástico que inutiliza a peça.
+A impressão 3D por deposição de material fundido (FDM) é amplamente utilizada em prototipagem, manufatura distribuída e produção acadêmica. O processo, porém, é suscetível a falhas silenciosas — em especial o **Efeito Espaguete**, onde o filamento é extrudado no ar sem aderir ao modelo, resultando em uma malha caótica de plástico que inutiliza completamente a peça.
 
 ### Impacto
 
 Falhas desse tipo causam:
 - **Desperdício de filamento** (que pode custar dezenas de reais por carretel);
-- **Perda de tempo** em impressões que podem durar horas ou dias;
+- **Perda de tempo** em impressões que duram horas ou dias;
 - **Danos potenciais ao equipamento** caso o filamento obstrua componentes;
 - **Impacto financeiro** em contextos de produção em série.
 
@@ -44,29 +44,30 @@ A detecção automática de falhas elimina a necessidade de monitoramento humano
 
 ### Limitações da Solução
 
-- O modelo atua sobre **imagens estáticas**, sem considerar o contexto temporal da impressão;
+- O modelo atua sobre **imagens estáticas** capturadas durante a impressão, sem análise temporal de frames consecutivos;
 - A câmera precisa ter posicionamento e iluminação adequados para captura confiável;
-- Casos extremamente atípicos de falha podem não ser reconhecidos se ausentes no dataset de treino;
-- A solução não substitui a supervisão humana, mas a complementa de forma eficiente.
+- O dataset é relativamente pequeno (327 imagens), o que pode limitar a generalização;
+- A solução não detecta outros tipos de falha além do Efeito Espaguete;
+- Requer que o backend Django esteja em execução local para funcionar.
 
 ### Justificativa do Uso de Deep Learning
 
-A detecção visual de padrões complexos e variáveis — como a morfologia irregular do Efeito Espaguete — é uma tarefa onde abordagens baseadas em regras falham. Redes Neurais Convolucionais (CNNs), especialmente com Transfer Learning, têm demonstrado desempenho superior em tarefas de classificação de imagens, tornando Deep Learning a escolha natural para este problema.
+A detecção visual de padrões complexos e variáveis — como a morfologia irregular do Efeito Espaguete — é uma tarefa onde abordagens baseadas em regras falham. Redes Neurais Convolucionais com Transfer Learning têm desempenho consolidado em classificação de imagens com conjuntos de dados pequenos, tornando essa a escolha ideal para o problema.
 
 ---
 
 ## 🎯 Objetivo da Solução
 
-O sistema tem como objetivo **classificar automaticamente imagens capturadas durante a impressão 3D** em duas categorias:
+O sistema **classifica automaticamente imagens capturadas durante a impressão 3D** em duas categorias:
 
 | Classe | Descrição |
 |---|---|
 | `success` | Impressão ocorrendo normalmente |
 | `failure` | Efeito Espaguete detectado |
 
-**Resultado esperado:** ao identificar uma falha, o sistema pode acionar um alerta ou interromper automaticamente a impressão, evitando desperdício.
+**Resultado esperado:** ao identificar uma falha, o sistema exibe um alerta e recomenda a interrupção imediata da impressão via G-code `M112`.
 
-**Ganho esperado:** redução do desperdício de filamento e tempo, além de maior autonomia para o operador durante impressões longas.
+**Ganho esperado:** redução do desperdício de filamento e tempo de máquina, com maior autonomia para o operador durante impressões longas.
 
 ---
 
@@ -78,107 +79,135 @@ Dataset público disponível no Kaggle: **[3D Printing - SUCCESS - FAILURE DATAS
 
 Derivado do projeto open-source **Obico / The Spaghetti Detective**, que coleta imagens reais de impressoras FDM de mesa aberta ao redor do mundo.
 
-### Características
+### Distribuição das Amostras
 
-| Atributo | Detalhe |
-|---|---|
-| Tipo de dado | Imagens RGB |
-| Classes | `success` / `failure` (binário) |
-| Origem | Impressoras FDM de mesa aberta — imagens reais |
-| Formato de entrada | `224x224 pixels` (após redimensionamento) |
+| Split | Classe `failure` | Classe `success` | Total |
+|---|---|---|---|
+| Treino (`train/`) | 114 | 114 | **228** |
+| Validação (`valid/`) | 32 | 32 | **64** |
+| Teste (`test/`) | 20 | 15 | **35** |
+| **Total** | **166** | **161** | **327** |
 
 ### Pré-processamento
 
-- **Redimensionamento:** todas as imagens foram redimensionadas para `224x224 pixels`, compatível com a entrada da arquitetura EfficientNetB3;
-- **Normalização:** valores de pixel normalizados para o intervalo `[0, 1]`;
-- **Separação treino/validação/teste:** o dataset está organizado nos diretórios `/train`, `/valid` e `/test`;
-- **Balanceamento:** verificado por meio do notebook `DataPipeline.ipynb`.
+- **Redimensionamento:** imagens redimensionadas para `300x300 pixels` no notebook principal (o `DataPipeline.ipynb` usa `224x224` como exploração inicial — o modelo treinado e em produção usa `300x300`);
+- **Normalização:** os valores de pixel são tratados internamente pela EfficientNetB3;
+- **Data Augmentation** aplicado durante o treino: flip horizontal e vertical, rotação de até 20% e zoom de até 20%;
+- **Otimização de pipeline:** uso de `prefetch` com `tf.data.AUTOTUNE` para carregamento eficiente;
+- **Balanceamento:** o dataset já está balanceado nas splits de treino e validação (114 e 32 amostras por classe, respectivamente).
 
 ### Limitações da Base
 
-- Imagens capturadas em condições variadas de iluminação e ângulo;
+- Dataset relativamente pequeno (327 imagens no total);
+- Imagens capturadas em condições variadas de iluminação e ângulo de câmera;
 - Possível viés para determinados modelos e marcas de impressoras;
-- Não cobre falhas de impressão além do Efeito Espaguete.
+- Cobre apenas o Efeito Espaguete como tipo de falha.
 
 ---
 
 ## 🧠 Modelagem em Deep Learning
 
-### Arquitetura
+O treinamento foi realizado em **duas fases** com Transfer Learning sobre a arquitetura **EfficientNetB3** pré-treinada na ImageNet.
 
-Foi adotado **Transfer Learning** com a arquitetura **EfficientNetB3** pré-treinada na ImageNet, com camadas de classificação customizadas adicionadas ao topo.
+### Fase 1 — Transfer Learning Padrão
 
-**Justificativa técnica:** a EfficientNetB3 oferece excelente equilíbrio entre acurácia e custo computacional, sendo adequada para implantação em ambientes com recursos limitados (como Raspberry Pi acoplados a impressoras). Seu desempenho em tarefas de classificação de imagens é consolidado na literatura.
-
-### Configuração do Treinamento
+As camadas da base (`EfficientNetB3`) são **congeladas**. Apenas a cabeça de classificação customizada é treinada.
 
 | Parâmetro | Valor |
 |---|---|
-| Tipo de rede | CNN (Transfer Learning — EfficientNetB3) |
-| Função de ativação | ReLU (camadas intermediárias) / Sigmoid (saída binária) |
+| Base | EfficientNetB3 (pesos ImageNet, `include_top=False`) |
+| Camadas adicionadas | `GlobalAveragePooling2D` → `Dropout(0.3)` → `Dense(1, sigmoid)` |
+| Data Augmentation | `RandomFlip`, `RandomRotation(0.2)`, `RandomZoom(0.2)` |
+| Otimizador | Adam (`lr=0.001`) |
 | Função de perda | Binary Crossentropy |
-| Otimizador | Adam |
-| Métricas | Accuracy, Precision, Recall, F1-Score, ROC-AUC |
+| Épocas | 10 |
 | Batch Size | 32 |
+| Tamanho da imagem | 300×300 px |
+
+### Fase 2 — Fine-Tuning Profundo
+
+As **últimas 30 camadas** da base são descongeladas e treinadas com learning rate reduzido.
+
+| Parâmetro | Valor |
+|---|---|
+| Camadas descongeladas | Últimas 30 da EfficientNetB3 |
+| Otimizador | Adam (`lr=1e-5`) |
+| Função de perda | Binary Crossentropy |
+| Épocas | até 15 (com Early Stopping) |
+| Callbacks | `EarlyStopping(patience=4, monitor='val_loss')` + `ModelCheckpoint(monitor='val_accuracy', save_best_only=True)` |
 
 ### Estratégias contra Overfitting
 
-- **Data Augmentation** (rotações, flips, zoom, brilho);
-- **Dropout** nas camadas densas superiores;
-- **Early Stopping** monitorando a loss de validação;
-- Congelamento das camadas base da EfficientNetB3 na fase inicial.
+- Data Augmentation (flip, rotação, zoom) integrado ao pipeline;
+- Dropout de 30% na camada densa;
+- Early Stopping com restauração dos melhores pesos;
+- Congelamento progressivo das camadas na Fase 1.
+
+### Justificativa da Arquitetura
+
+A EfficientNetB3 oferece excelente equilíbrio entre acurácia e custo computacional, sendo adequada para inferência em ambientes com recursos limitados. Seu desempenho em tarefas de classificação de imagens com fine-tuning é consolidado na literatura, especialmente com datasets pequenos.
 
 ---
 
 ## 📊 Avaliação dos Resultados
 
-### Métricas Utilizadas
+### Resultados Obtidos no Conjunto de Teste (35 amostras)
 
-O modelo foi avaliado com métricas adequadas ao contexto de classificação binária com impacto prático na taxa de falsos negativos (falhas não detectadas):
+| Métrica | Valor |
+|---|---|
+| **Accuracy** | 85,71% |
+| **Precision** | 85,71% |
+| **Recall** | 80,00% |
+| **F1-Score** | 82,76% |
+| **ROC-AUC** | 0,967 |
 
-- **Accuracy** — proporção geral de acertos;
-- **Precision** — dos casos classificados como falha, quantos realmente eram;
-- **Recall** — dos casos reais de falha, quantos foram detectados;
-- **F1-Score** — harmônico entre Precision e Recall;
-- **Matriz de Confusão** — visualização detalhada dos acertos e erros;
-- **Curva ROC / AUC** — avaliação da separabilidade entre classes;
-- **Curvas de Loss e Accuracy** — treino vs. validação ao longo das épocas.
+### Curvas de Aprendizado
 
-### Visualizações
+- A **accuracy de validação** atingiu aproximadamente **98%** já nas primeiras épocas da Fase 1, mantendo-se estável durante o Fine-Tuning;
+- A **loss de validação** convergiu para valores próximos a **0,15**, com comportamento estável ao longo de todas as épocas;
+- O pico de loss de treino no início da Fase 2 é esperado pelo descongelamento das camadas e pela redução drástica do learning rate, normalizando rapidamente em seguida.
 
-Os gráficos de desempenho estão disponíveis no notebook principal `Deteccao_Falhas_Impressao3D.ipynb` e incluem:
+<img width="587" height="460" alt="Accuracy ao longo das Épocas" src="https://github.com/user-attachments/assets/ef5c7b39-eea7-4b6c-9f77-2daafdfb8c1c" />
+<img width="567" height="449" alt="Loss ao longo das Épocas" src="https://github.com/user-attachments/assets/75161a6b-0616-4a71-84a7-95fd81bddf17" />
 
-- Curvas de aprendizado (loss e accuracy);
-- Matriz de confusão;
-- Curva ROC.
+### Matriz de Confusão
+
+|  | Predito: Falha | Predito: Sucesso |
+|---|---|---|
+| **Real: Falha** | 18 ✅ | 2 ❌ |
+| **Real: Sucesso** | 3 ❌ | 12 ✅ |
+
+O modelo acertou 18 de 20 casos de falha (90% de detecção de falhas) e 12 de 15 casos de impressão saudável. Os 2 falsos negativos (falhas não detectadas) são o cenário mais crítico, pois deixam a impressão continuar com defeito. Os 3 falsos positivos (impressões saudáveis classificadas como falha) geram interrupções desnecessárias, mas são menos prejudiciais.
+
+<img width="639" height="482" alt="Matriz de Confusão" src="https://github.com/user-attachments/assets/6e1164d7-4491-4809-938e-33730bf31dd5" />
+
+### Curva ROC
+
+<img width="697" height="463" alt="Curva ROC" src="https://github.com/user-attachments/assets/cc05fdf8-16e0-4bb7-8765-3309a037e511" />
+
+### Interpretação Crítica
+
+O ROC-AUC de **0,967** indica excelente capacidade de separação entre as classes. A accuracy de validação (~98%) é consideravelmente superior à accuracy de teste (85,71%), o que é esperado dado o tamanho reduzido do conjunto de teste (apenas 35 amostras), onde cada erro tem peso proporcionalmente maior. Para um contexto de uso real, o ROC-AUC elevado é o indicador mais confiável da qualidade do modelo.
 
 ### Limitações do Modelo
 
-- Desempenho pode cair com iluminação muito distinta do dataset de treino;
-- Não detecta falhas além do Efeito Espaguete;
-- Requer imagem de qualidade mínima para classificação confiável.
+- Dataset pequeno pode limitar a generalização para impressoras e condições muito distintas das do treino;
+- Não detecta outros tipos de falha além do Efeito Espaguete;
+- Desempenho pode cair com iluminação muito diferente das imagens de treino.
 
 ### Possíveis Melhorias Futuras
 
-- Expansão do dataset com maior diversidade de impressoras e condições;
-- Implementação de análise temporal (sequência de frames) para detecção mais robusta;
-- Suporte a múltiplas classes de falha;
-- Fine-tuning completo do modelo base com dataset expandido;
-- Integração com firmware de impressoras (ex: Klipper, Marlin) para interrupção automática.
+- Ampliar o dataset com maior diversidade de impressoras, filamentos e condições de iluminação;
+- Implementar análise temporal (sequência de frames) para detecção mais robusta;
+- Suporte a múltiplas classes de falha (layer shifting, under-extrusion, etc.);
+- Conversão para TensorFlow Lite para inferência embarcada (Raspberry Pi, ESP32-CAM);
+- Integração direta com firmware de impressoras (Klipper, Marlin) para interrupção automática.
 
 ---
 
 ## 🌍 Aplicabilidade Real
 
-### Como a solução poderia ser usada
-
-O sistema pode ser integrado a qualquer impressora 3D FDM por meio de uma câmera de baixo custo (ex: câmera USB ou módulo ESP32-CAM) conectada a um servidor local ou embarcado. A cada intervalo de tempo, uma imagem é capturada, enviada ao modelo e classificada. Em caso de falha detectada, um alerta é disparado ou a impressora é interrompida via API.
-
-### Custos Computacionais
-
-O modelo baseado em EfficientNetB3 é leve o suficiente para inferência em CPU em tempo quase real. Para uso embarcado, pode ser convertido para TensorFlow Lite.
-
-### Impactos
+O sistema pode ser integrado a qualquer impressora 3D FDM por meio de uma câmera de baixo custo conectada a um servidor local. A cada intervalo de tempo, uma foto da mesa de impressão é capturada, enviada ao backend Django e classificada pelo modelo. Em caso de falha detectada, a interface exibe um alerta com o diagnóstico e a recomendação de executar o G-code `M112` (interrupção de emergência).
 
 | Dimensão | Impacto |
 |---|---|
@@ -187,21 +216,18 @@ O modelo baseado em EfficientNetB3 é leve o suficiente para inferência em CPU 
 | Técnico | Integração possível com ecossistemas de automação existentes |
 | Ambiental | Menos descarte de plástico por peças com falha |
 
-### Viabilidade Prática
-
-Alta. O hardware necessário (câmera + microcomputador) tem custo acessível, e soluções como o próprio Obico já validam a viabilidade comercial do conceito.
-
 ---
 
 ## 🖥️ Demonstração Funcional
 
-O projeto inclui uma **interface web** (frontend + backend) que permite ao usuário:
+O projeto inclui uma aplicação web completa com **frontend em React (Vite)** e **backend em Django**, que permite:
 
-1. Fazer upload de uma imagem capturada da impressora;
-2. Receber a classificação do modelo (`success` ou `failure`);
-3. Visualizar a confiança da predição.
+1. Upload de uma foto capturada da impressora (JPG, PNG ou WEBP);
+2. Envio da imagem à API Django via `POST /predict`;
+3. Exibição do diagnóstico (`Impressão Saudável` ou `ALERTA: Falha Detectada`) e da confiança do modelo em percentual com barra visual;
+4. Em caso de falha: alerta com instrução de abortar impressão via G-code `M112`.
 
-Os notebooks também podem ser executados de forma independente para reproduzir o treinamento e a avaliação do modelo.
+O modelo treinado (`melhor_modelo_efficientnet_pc.keras`) é carregado automaticamente pelo backend no momento da inicialização.
 
 ---
 
@@ -210,24 +236,36 @@ Os notebooks também podem ser executados de forma independente para reproduzir 
 ```
 Deep-Learning-special-topics-computing/
 │
-├── backend/                   # API de inferência (servidor Python)
+├── backend/                        # API de inferência (Django)
+│   ├── api/
+│   │   └── views.py                # Endpoint POST /predict — carrega o modelo e faz a predição
+│   ├── setup/
+│   │   ├── settings.py             # Configurações Django (CORS habilitado)
+│   │   └── urls.py                 # Roteamento: /predict → predict_view
+│   ├── Deteccao_Falhas_Impressao3D.ipynb  # Notebook principal (executar aqui para gerar o .keras)
+│   ├── melhor_modelo_efficientnet_pc.keras  # Modelo treinado (gerado ao executar o notebook acima)
+│   └── manage.py
 │
-├── frontend/                  # Interface web para demonstração funcional
+├── frontend/                       # Interface web (React + Vite)
+│   ├── src/
+│   │   ├── App.jsx                 # Componente principal: upload, chamada à API e exibição do resultado
+│   │   └── App.css
+│   └── package.json                # Dependências: React 19, Vite 8
 │
 ├── notebooks/
-│   ├── DataPipeline.ipynb     # Pré-processamento e análise exploratória do dataset
-│   └── Deteccao_Falhas_Impressao3D.ipynb  # Treinamento, avaliação e métricas do modelo
+│   ├── DataPipeline.ipynb          # Exploração e carregamento do dataset
+│   └── Deteccao_Falhas_Impressao3D.ipynb  # Cópia do notebook principal
 │
-├── data/                      # Dataset (instruções de obtenção abaixo)
+├── data/                           # Dataset de imagens (baixar via Kaggle — instruções abaixo)
 │   ├── train/
-│   │   ├── success/
-│   │   └── failure/
+│   │   ├── failure/   (114 imagens)
+│   │   └── success/   (114 imagens)
 │   ├── valid/
-│   │   ├── success/
-│   │   └── failure/
+│   │   ├── failure/   (32 imagens)
+│   │   └── success/   (32 imagens)
 │   └── test/
-│       ├── success/
-│       └── failure/
+│       ├── failure/   (20 imagens)
+│       └── success/   (15 imagens)
 │
 ├── .gitignore
 └── README.md
@@ -239,14 +277,14 @@ Deep-Learning-special-topics-computing/
 
 | Categoria | Tecnologia |
 |---|---|
-| Linguagem | Python 3.x |
+| Linguagem | Python 3.14 |
 | Deep Learning | TensorFlow / Keras |
-| Arquitetura | EfficientNetB3 (Transfer Learning) |
-| Análise de Dados | NumPy, Pandas |
+| Arquitetura | EfficientNetB3 (Transfer Learning + Fine-Tuning) |
+| Processamento de imagem | Pillow (PIL) |
+| Análise e métricas | NumPy, Scikit-learn |
 | Visualização | Matplotlib, Seaborn |
-| Avaliação | Scikit-learn |
-| Interface | HTML, CSS, JavaScript (frontend) |
-| Backend / API | Python (backend) |
+| Backend / API | Django 6 + django-cors-headers |
+| Frontend | React 19 + Vite 8 |
 | Notebooks | Jupyter Notebook |
 
 ---
@@ -255,10 +293,9 @@ Deep-Learning-special-topics-computing/
 
 ### Pré-requisitos
 
-- Python 3.8 ou superior
+- Python 3.14
+- Node.js 18+
 - pip
-- (Recomendado) Ambiente virtual via `venv` ou `conda`
-- GPU com CUDA (opcional, mas recomendado para treinamento)
 
 ### 1. Clonar o repositório
 
@@ -267,53 +304,66 @@ git clone https://github.com/Victor-Sarris/Deep-Learning-special-topics-computin
 cd Deep-Learning-special-topics-computing
 ```
 
-### 2. Criar e ativar o ambiente virtual
+### 2. Obter o Dataset
 
-```bash
-python -m venv venv
-# Linux/macOS
-source venv/bin/activate
-# Windows
-venv\Scripts\activate
-```
-
-### 3. Instalar as dependências
-
-```bash
-pip install tensorflow numpy matplotlib seaborn scikit-learn pandas jupyter
-```
-
-### 4. Obter o Dataset
-
-Baixe o dataset no Kaggle e extraia os arquivos no diretório `data/`:
+Baixe o dataset no Kaggle e extraia os arquivos nos diretórios `data/train/`, `data/valid/` e `data/test/`:
 
 🔗 [3D Printing - SUCCESS - FAILURE DATASET (finetuned)](https://www.kaggle.com/datasets/bshaurya/3d-printing-success-failure-dataset-finetuned)
 
-### 5. Executar o pipeline de dados (pré-processamento)
+### 3. Treinar o Modelo (Notebook)
 
 ```bash
-jupyter notebook notebooks/DataPipeline.ipynb
-```
-
-### 6. Treinar e avaliar o modelo
-
-```bash
-jupyter notebook notebooks/Deteccao_Falhas_Impressao3D.ipynb
-```
-
-> ⚠️ Ao final da execução, um arquivo `.keras` com os pesos treinados será gerado automaticamente para ser consumido pelo backend.
-
-### 7. Executar a demonstração funcional (interface web)
-
-```bash
-# Iniciar o backend
+pip install tensorflow matplotlib numpy scikit-learn seaborn jupyter pillow
 cd backend
-python app.py
+jupyter notebook Deteccao_Falhas_Impressao3D.ipynb
+```
 
-# Em outro terminal, abrir o frontend
+> O notebook carrega os dados com caminhos relativos (`'train'`, `'valid'`, `'test'`), portanto deve ser executado a partir de `backend/`. Como o dataset está na raiz em `data/`, crie links simbólicos antes de rodar:
+>
+> ```bash
+> # Dentro de backend/
+> ln -s ../data/train train
+> ln -s ../data/valid valid
+> ln -s ../data/test test
+> ```
+>
+> Ao final da execução, o arquivo `melhor_modelo_efficientnet_pc.keras` será salvo automaticamente em `backend/`, onde o servidor Django o procura.
+
+### 4. Iniciar o Backend (Django)
+
+```bash
+cd backend
+pip install django django-cors-headers tensorflow pillow
+python manage.py runserver
+```
+
+O servidor sobe em `http://localhost:8000`. O modelo é carregado automaticamente na inicialização.
+
+### 5. Iniciar o Frontend (React)
+
+Em outro terminal:
+
+```bash
 cd frontend
-# Abrir index.html no navegador ou servir com:
-python -m http.server 8080
+npm install
+npm run dev
+```
+
+Acesse `http://localhost:5173` no navegador.
+
+### Endpoint da API
+
+| Método | URL | Descrição |
+|---|---|---|
+| `POST` | `http://localhost:8000/predict` | Recebe uma imagem (`multipart/form-data`, campo `file`) e retorna o diagnóstico em JSON |
+
+**Exemplo de resposta:**
+```json
+{
+  "status": "ALERTA: Falha Detectada (Efeito Espaguete)",
+  "confianca": 94.37,
+  "is_sucesso": false
+}
 ```
 
 ---
@@ -323,7 +373,7 @@ python -m http.server 8080
 | Nome |
 |---|
 | Amanda Iasmin Sousa Nascimento |
-| Izaque Nícolas Vieira de Melo|
+| Izaque Nícolas Vieira de Melo |
 | José Henrique Vieira da Silva |
 | Matheus Ribeiro de Araújo |
 | Sabrina Laís Vieira Ramos |
