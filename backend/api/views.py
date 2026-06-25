@@ -1,19 +1,20 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from PIL import Image
-import tensorflow as tf
 import numpy as np
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "melhor_modelo_efficientnet_pc.keras")
 
-print("A carregar o modelo EfficientNetB3...")
-model = tf.keras.models.load_model(MODEL_PATH)
-print("Modelo carregado com sucesso!")
+_model = None
+
+def get_model():
+    global _model
+    if _model is None:
+        import tensorflow as tf
+        _model = tf.keras.models.load_model(MODEL_PATH)
+    return _model
 
 
 @csrf_exempt
@@ -22,6 +23,9 @@ def predict_view(request):
         file = request.FILES.get("file")
         if not file:
             return JsonResponse({"error": "Nenhuma imagem enviada."}, status=400)
+
+        import tensorflow as tf
+        model = get_model()
 
         img = Image.open(file).convert("RGB")
         img = img.resize((300, 300))
