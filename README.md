@@ -29,6 +29,7 @@ A impressão 3D por deposição de material fundido (FDM) é amplamente utilizad
 ### Impacto
 
 Falhas desse tipo causam:
+
 - **Desperdício de filamento** (que pode custar dezenas de reais por carretel);
 - **Perda de tempo** em impressões que duram horas ou dias;
 - **Danos potenciais ao equipamento** caso o filamento obstrua componentes;
@@ -60,10 +61,10 @@ A detecção visual de padrões complexos e variáveis — como a morfologia irr
 
 O sistema **classifica automaticamente imagens capturadas durante a impressão 3D** em duas categorias:
 
-| Classe | Descrição |
-|---|---|
+| Classe    | Descrição                       |
+| --------- | ------------------------------- |
 | `success` | Impressão ocorrendo normalmente |
-| `failure` | Efeito Espaguete detectado |
+| `failure` | Efeito Espaguete detectado      |
 
 **Resultado esperado:** ao identificar uma falha, o sistema exibe um alerta e recomenda a interrupção imediata da impressão via G-code `M112`.
 
@@ -81,12 +82,12 @@ Derivado do projeto open-source **Obico / The Spaghetti Detective**, que coleta 
 
 ### Distribuição das Amostras
 
-| Split | Classe `failure` | Classe `success` | Total |
-|---|---|---|---|
-| Treino (`train/`) | 114 | 114 | **228** |
-| Validação (`valid/`) | 32 | 32 | **64** |
-| Teste (`test/`) | 20 | 15 | **35** |
-| **Total** | **166** | **161** | **327** |
+| Split                | Classe `failure` | Classe `success` | Total   |
+| -------------------- | ---------------- | ---------------- | ------- |
+| Treino (`train/`)    | 114              | 114              | **228** |
+| Validação (`valid/`) | 32               | 32               | **64**  |
+| Teste (`test/`)      | 20               | 15               | **35**  |
+| **Total**            | **166**          | **161**          | **327** |
 
 ### Pré-processamento
 
@@ -113,28 +114,28 @@ O treinamento foi realizado em **duas fases** com Transfer Learning sobre a arqu
 
 As camadas da base (`EfficientNetB3`) são **congeladas**. Apenas a cabeça de classificação customizada é treinada.
 
-| Parâmetro | Valor |
-|---|---|
-| Base | EfficientNetB3 (pesos ImageNet, `include_top=False`) |
+| Parâmetro           | Valor                                                           |
+| ------------------- | --------------------------------------------------------------- |
+| Base                | EfficientNetB3 (pesos ImageNet, `include_top=False`)            |
 | Camadas adicionadas | `GlobalAveragePooling2D` → `Dropout(0.3)` → `Dense(1, sigmoid)` |
-| Data Augmentation | `RandomFlip`, `RandomRotation(0.2)`, `RandomZoom(0.2)` |
-| Otimizador | Adam (`lr=0.001`) |
-| Função de perda | Binary Crossentropy |
-| Épocas | 10 |
-| Batch Size | 32 |
-| Tamanho da imagem | 300×300 px |
+| Data Augmentation   | `RandomFlip`, `RandomRotation(0.2)`, `RandomZoom(0.2)`          |
+| Otimizador          | Adam (`lr=0.001`)                                               |
+| Função de perda     | Binary Crossentropy                                             |
+| Épocas              | 10                                                              |
+| Batch Size          | 32                                                              |
+| Tamanho da imagem   | 300×300 px                                                      |
 
 ### Fase 2 — Fine-Tuning Profundo
 
 As **últimas 30 camadas** da base são descongeladas e treinadas com learning rate reduzido.
 
-| Parâmetro | Valor |
-|---|---|
-| Camadas descongeladas | Últimas 30 da EfficientNetB3 |
-| Otimizador | Adam (`lr=1e-5`) |
-| Função de perda | Binary Crossentropy |
-| Épocas | até 15 (com Early Stopping) |
-| Callbacks | `EarlyStopping(patience=4, monitor='val_loss')` + `ModelCheckpoint(monitor='val_accuracy', save_best_only=True)` |
+| Parâmetro             | Valor                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Camadas descongeladas | Últimas 30 da EfficientNetB3                                                                                     |
+| Otimizador            | Adam (`lr=1e-5`)                                                                                                 |
+| Função de perda       | Binary Crossentropy                                                                                              |
+| Épocas                | até 15 (com Early Stopping)                                                                                      |
+| Callbacks             | `EarlyStopping(patience=4, monitor='val_loss')` + `ModelCheckpoint(monitor='val_accuracy', save_best_only=True)` |
 
 ### Estratégias contra Overfitting
 
@@ -153,13 +154,13 @@ A EfficientNetB3 oferece excelente equilíbrio entre acurácia e custo computaci
 
 ### Resultados Obtidos no Conjunto de Teste (35 amostras)
 
-| Métrica | Valor |
-|---|---|
-| **Accuracy** | 85,71% |
+| Métrica       | Valor  |
+| ------------- | ------ |
+| **Accuracy**  | 85,71% |
 | **Precision** | 85,71% |
-| **Recall** | 80,00% |
-| **F1-Score** | 82,76% |
-| **ROC-AUC** | 0,967 |
+| **Recall**    | 80,00% |
+| **F1-Score**  | 82,76% |
+| **ROC-AUC**   | 0,967  |
 
 ### Curvas de Aprendizado
 
@@ -172,10 +173,10 @@ A EfficientNetB3 oferece excelente equilíbrio entre acurácia e custo computaci
 
 ### Matriz de Confusão
 
-|  | Predito: Falha | Predito: Sucesso |
-|---|---|---|
-| **Real: Falha** | 18 ✅ | 2 ❌ |
-| **Real: Sucesso** | 3 ❌ | 12 ✅ |
+|                   | Predito: Falha | Predito: Sucesso |
+| ----------------- | -------------- | ---------------- |
+| **Real: Falha**   | 18 ✅          | 2 ❌             |
+| **Real: Sucesso** | 3 ❌           | 12 ✅            |
 
 O modelo acertou 18 de 20 casos de falha (90% de detecção de falhas) e 12 de 15 casos de impressão saudável. Os 2 falsos negativos (falhas não detectadas) são o cenário mais crítico, pois deixam a impressão continuar com defeito. Os 3 falsos positivos (impressões saudáveis classificadas como falha) geram interrupções desnecessárias, mas são menos prejudiciais.
 
@@ -209,12 +210,12 @@ O ROC-AUC de **0,967** indica excelente capacidade de separação entre as class
 
 O sistema pode ser integrado a qualquer impressora 3D FDM por meio de uma câmera de baixo custo conectada a um servidor local. A cada intervalo de tempo, uma foto da mesa de impressão é capturada, enviada ao backend Django e classificada pelo modelo. Em caso de falha detectada, a interface exibe um alerta com o diagnóstico e a recomendação de executar o G-code `M112` (interrupção de emergência).
 
-| Dimensão | Impacto |
-|---|---|
-| Econômico | Redução de desperdício de filamento e tempo de máquina |
-| Social | Democratiza impressão 3D autônoma e confiável |
-| Técnico | Integração possível com ecossistemas de automação existentes |
-| Ambiental | Menos descarte de plástico por peças com falha |
+| Dimensão  | Impacto                                                      |
+| --------- | ------------------------------------------------------------ |
+| Econômico | Redução de desperdício de filamento e tempo de máquina       |
+| Social    | Democratiza impressão 3D autônoma e confiável                |
+| Técnico   | Integração possível com ecossistemas de automação existentes |
+| Ambiental | Menos descarte de plástico por peças com falha               |
 
 ---
 
@@ -275,17 +276,17 @@ Deep-Learning-special-topics-computing/
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Categoria | Tecnologia |
-|---|---|
-| Linguagem | Python 3.14 |
-| Deep Learning | TensorFlow / Keras |
-| Arquitetura | EfficientNetB3 (Transfer Learning + Fine-Tuning) |
-| Processamento de imagem | Pillow (PIL) |
-| Análise e métricas | NumPy, Scikit-learn |
-| Visualização | Matplotlib, Seaborn |
-| Backend / API | Django 6 + django-cors-headers |
-| Frontend | React 19 + Vite 8 |
-| Notebooks | Jupyter Notebook |
+| Categoria               | Tecnologia                                       |
+| ----------------------- | ------------------------------------------------ |
+| Linguagem               | Python 3.14                                      |
+| Deep Learning           | TensorFlow / Keras                               |
+| Arquitetura             | EfficientNetB3 (Transfer Learning + Fine-Tuning) |
+| Processamento de imagem | Pillow (PIL)                                     |
+| Análise e métricas      | NumPy, Scikit-learn                              |
+| Visualização            | Matplotlib, Seaborn                              |
+| Backend / API           | Django 6 + django-cors-headers                   |
+| Frontend                | React 19 + Vite 8                                |
+| Notebooks               | Jupyter Notebook                                 |
 
 ---
 
@@ -353,11 +354,12 @@ Acesse `http://localhost:5173` no navegador.
 
 ### Endpoint da API
 
-| Método | URL | Descrição |
-|---|---|---|
+| Método | URL                             | Descrição                                                                               |
+| ------ | ------------------------------- | --------------------------------------------------------------------------------------- |
 | `POST` | `http://localhost:8000/predict` | Recebe uma imagem (`multipart/form-data`, campo `file`) e retorna o diagnóstico em JSON |
 
 **Exemplo de resposta:**
+
 ```json
 {
   "status": "ALERTA: Falha Detectada (Efeito Espaguete)",
@@ -368,16 +370,66 @@ Acesse `http://localhost:5173` no navegador.
 
 ---
 
-## 👥 Equipe
+<h3 align="center">👥 Colaboradores</h3>
 
-| Nome |
-|---|
-| Amanda Iasmin Sousa Nascimento |
-| Izaque Nícolas Vieira de Melo |
-| José Henrique Vieira da Silva |
-| Matheus Ribeiro de Araújo |
-| Sabrina Laís Vieira Ramos |
-| Victor Sarrís Silva Santos |
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/AmandaGitH">
+        <img src="https://avatars.githubusercontent.com/u/181160672?v=4" width="100px;" alt=""/><br />
+        <sub><b>Amanda Iasmin</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/cleberhdev">
+        <img src="https://avatars.githubusercontent.com/u/141072429?v=4" width="100px;" alt=""/><br />
+        <sub><b>Cleber Henrique</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/franciscodevpro">
+        <img src="https://avatars.githubusercontent.com/u/173816316?v=4" width="100px;" alt=""/><br />
+        <sub><b>Francisco</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Izaque123">
+        <img src="https://avatars.githubusercontent.com/u/106625747?v=4" width="100px;" alt=""/><br />
+        <sub><b>Izaque Nicolas</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/josehenriquevs">
+        <img src="https://avatars.githubusercontent.com/u/187699545?v=4" width="100px;" alt=""/><br />
+        <sub><b>José Henrique</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Matheus10DV">
+        <img src="https://avatars.githubusercontent.com/u/192535212?v=4" width="100px;" alt=""/><br />
+        <sub><b>Matheus Ribeiro</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Victor-Sarris">
+        <img src="https://avatars.githubusercontent.com/u/178488451?v=4" width="100px;" alt=""/><br />
+        <sub><b>Victor Sarrís</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/imnotSabrina">
+        <img src="https://avatars.githubusercontent.com/u/106186281?v=4" width="100px;" alt=""/><br />
+        <sub><b>Sabrina Laís</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+</div>
 
 ---
 
