@@ -388,14 +388,14 @@ Acesse `http://localhost:5173` no navegador.
         <sub><b>Izaque Nicolas</b></sub>
       </a>
     </td>
-  </tr>
-  <tr>
     <td align="center">
       <a href="https://github.com/josehenriquevs">
         <img src="https://avatars.githubusercontent.com/u/187699545?v=4" width="100px;" alt=""/><br />
         <sub><b>José Henrique</b></sub>
       </a>
     </td>
+  </tr>
+  <tr>
     <td align="center">
       <a href="https://github.com/Matheus10DV">
         <img src="https://avatars.githubusercontent.com/u/192535212?v=4" width="100px;" alt=""/><br />
