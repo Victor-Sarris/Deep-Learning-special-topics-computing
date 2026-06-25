@@ -24,7 +24,7 @@ function App() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/predict", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/predict`, {
         method: "POST",
         body: formData,
       });
