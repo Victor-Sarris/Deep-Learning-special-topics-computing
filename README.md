@@ -383,18 +383,6 @@ Acesse `http://localhost:5173` no navegador.
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/cleberhdev">
-        <img src="https://avatars.githubusercontent.com/u/141072429?v=4" width="100px;" alt=""/><br />
-        <sub><b>Cleber Henrique</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/franciscodevpro">
-        <img src="https://avatars.githubusercontent.com/u/173816316?v=4" width="100px;" alt=""/><br />
-        <sub><b>Francisco</b></sub>
-      </a>
-    </td>
-    <td align="center">
       <a href="https://github.com/Izaque123">
         <img src="https://avatars.githubusercontent.com/u/106625747?v=4" width="100px;" alt=""/><br />
         <sub><b>Izaque Nicolas</b></sub>
