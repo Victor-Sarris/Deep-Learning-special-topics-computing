@@ -11,14 +11,6 @@ function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
       {/* HEADER / HERO SECTION */}
-      Para deixar a sua Landing Page com um aspeto ainda mais tecnológico e profissional, reescrevi a secção do <header>.
-
-Adicionei um fundo escuro com uma grelha subtil (que remete para a mesa de uma impressora 3D ou matrizes de IA), "borrões" de luz néon (blur) para dar profundidade, um texto principal com um gradiente mais vibrante e um botão secundário para as pessoas fazerem scroll diretamente para a documentação.
-
-Substitua todo o bloco <header> ... </header> no seu ficheiro src/home.jsx por este novo código:
-
-JavaScript
-      {/* HEADER / HERO SECTION */}
       <header className="relative overflow-hidden bg-slate-950 text-white pt-32 pb-40 px-4 sm:px-6 lg:px-8">
         {/* Efeitos de Fundo (Grid e Glow) */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -39,7 +31,9 @@ JavaScript
 
           {/* Título Principal */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-8">
-            <span className="block text-white mb-2 drop-shadow-sm">Detecção de Falhas</span>
+            <span className="block text-white mb-2 drop-shadow-sm">
+              Detecção de Falhas
+            </span>
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-blue-400 to-cyan-400 drop-shadow-lg">
               em Impressão 3D
             </span>
@@ -47,7 +41,10 @@ JavaScript
 
           {/* Subtítulo */}
           <p className="mt-6 max-w-2xl text-lg sm:text-xl text-slate-300 mx-auto font-light leading-relaxed mb-12">
-            Projeto de Deep Learning aplicado à detecção automática do <strong>Efeito Espaguete</strong> em impressoras FDM. Desenvolvido como Atividade Prática da disciplina de Tópicos Especiais em Computação.
+            Projeto de Deep Learning aplicado à detecção automática do{" "}
+            <strong>Efeito Espaguete</strong> em impressoras FDM. Desenvolvido
+            como Atividade Prática da disciplina de Tópicos Especiais em
+            Computação.
           </p>
 
           {/* Botões de Ação */}
@@ -58,19 +55,39 @@ JavaScript
             >
               <span>Testar IA na Prática</span>
               {/* Ícone de Raio */}
-              <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <svg
+                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
               </svg>
             </Link>
-            
+
             <a
               href="#sobre"
               className="inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-semibold text-slate-300 transition-all duration-300 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:text-white backdrop-blur-sm"
             >
               <span>Entender o Projeto</span>
               {/* Ícone de Seta para baixo */}
-              <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </a>
           </div>
