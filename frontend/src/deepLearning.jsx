@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import "./App.css";
-import { Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./Navbar.jsx";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function DeepLearning() {
   const [imagem, setImagem] = useState(null);
@@ -63,7 +65,7 @@ function DeepLearning() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/predict", {
+      const response = await fetch(`${API_URL}/predict`, {
         method: "POST",
         body: formData,
       });
@@ -84,7 +86,9 @@ function DeepLearning() {
     }
   };
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 sm:p-8 font-sans text-slate-900 dark:text-slate-100 relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100">
+      <Navbar />
+      <div className="min-h-[calc(100vh-4rem)] w-full flex items-center justify-center p-4 sm:p-8 relative overflow-hidden transition-colors duration-300">
       {/* Elementos decorativos de fundo para dar um toque elegante */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[128px] -z-10 pointer-events-none"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px] -z-10 pointer-events-none"></div>
@@ -379,6 +383,7 @@ function DeepLearning() {
             </div>
           )}
         </main>
+      </div>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-zb54$1^3$s)1i9e##g4$)sokrtcep5jg-_z=)pc&op)91j6z7w"
+# Em produção, defina a variável de ambiente DJANGO_SECRET_KEY.
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-dev-only-change-me-in-production",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG fica True apenas se DJANGO_DEBUG não for definido como "false".
+DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() != "false"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if h.strip()
+]
 
 
 # Application definition
@@ -119,4 +129,16 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS: em dev libera tudo; em produção (DEBUG=False) restringe às origens
+# definidas em CORS_ALLOWED_ORIGINS (variável de ambiente, separadas por vírgula).
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        o.strip()
+        for o in os.getenv(
+            "CORS_ALLOWED_ORIGINS", "http://localhost:5173"
+        ).split(",")
+        if o.strip()
+    ]
