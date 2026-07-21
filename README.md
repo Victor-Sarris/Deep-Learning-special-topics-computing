@@ -313,8 +313,10 @@ Baixe o dataset no Kaggle e extraia os arquivos nos diretórios `data/train/`, `
 
 ### 3. Treinar o Modelo (Notebook)
 
+Instale as dependências de treino (o `requirements-dev.txt` já inclui as de produção mais Jupyter, Matplotlib, Seaborn e Scikit-learn):
+
 ```bash
-pip install tensorflow matplotlib numpy scikit-learn seaborn jupyter pillow
+pip install -r requirements-dev.txt
 cd backend
 jupyter notebook Deteccao_Falhas_Impressao3D.ipynb
 ```
@@ -332,11 +334,15 @@ jupyter notebook Deteccao_Falhas_Impressao3D.ipynb
 
 ### 4. Iniciar o Backend (Django)
 
+Para apenas servir a API, instale as dependências de produção (a partir da raiz do projeto):
+
 ```bash
+pip install -r requirements.txt
 cd backend
-pip install django django-cors-headers tensorflow pillow
 python manage.py runserver
 ```
+
+> **Configuração via `.env` (opcional):** copie `backend/.env.example` para `backend/.env` para definir `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` e `PREDICT_THRESHOLD`. Sem `.env`, o backend roda em modo de desenvolvimento com valores padrão.
 
 O servidor sobe em `http://localhost:8000`. O modelo é carregado automaticamente na inicialização.
 
@@ -351,6 +357,8 @@ npm run dev
 ```
 
 Acesse `http://localhost:5173` no navegador.
+
+> **URL da API (opcional):** por padrão o frontend aponta para `http://localhost:8000`. Para mudar, copie `frontend/.env.example` para `frontend/.env` e ajuste `VITE_API_URL`.
 
 ### Endpoint da API
 

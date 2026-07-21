@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
 import "./App.css";
-import { Routes, Route, Navigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Navbar from "./Navbar.jsx";
 
 import imgAccuracy from "./assets/img/accuracy_epochs.png";
 import imgLoss from "./assets/img/tripplet_loss.png";
@@ -10,8 +10,9 @@ import imgRoc from "./assets/img/Curva_Roc.png";
 function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
+      <Navbar />
       {/* HEADER / HERO SECTION */}
-      <header className="relative overflow-hidden bg-slate-950 text-white pt-32 pb-40 px-4 sm:px-6 lg:px-8">
+      <header className="relative overflow-hidden bg-slate-950 text-white pt-24 pb-40 px-4 sm:px-6 lg:px-8">
         {/* Efeitos de Fundo (Grid e Glow) */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/30 rounded-full blur-[120px] opacity-70 pointer-events-none"></div>
@@ -72,7 +73,7 @@ function Home() {
 
             <a
               href="#sobre"
-              className="inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-semibold text-slate-300 transition-all duration-300 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:text-white backdrop-blur-sm"
+              className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-lg font-semibold text-slate-300 transition-all duration-300 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:text-white backdrop-blur-sm"
             >
               <span>Entender o Projeto</span>
               {/* Ícone de Seta para baixo */}
