@@ -132,13 +132,11 @@ STATIC_URL = "static/"
 # CORS: em dev libera tudo; em produção (DEBUG=False) restringe às origens
 # definidas em CORS_ALLOWED_ORIGINS (variável de ambiente, separadas por vírgula).
 if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_ALL_ORIGINS = False
 else:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [
         o.strip()
-        for o in os.getenv(
-            "CORS_ALLOWED_ORIGINS", "http://localhost:5173"
-        ).split(",")
+        for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
         if o.strip()
     ]
