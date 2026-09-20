@@ -132,7 +132,7 @@ STATIC_URL = "static/"
 # CORS: em dev libera tudo; em produção (DEBUG=False) restringe às origens
 # definidas em CORS_ALLOWED_ORIGINS (variável de ambiente, separadas por vírgula).
 if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [
